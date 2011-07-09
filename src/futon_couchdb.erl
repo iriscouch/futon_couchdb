@@ -9,6 +9,24 @@
 
 handle_futon_req(#httpd{}=Req) -> ok
     , ?LOG_DEBUG("Received Futon request:\n~p", [Req])
+    , case code:priv_dir(?MODULE)
+        of {error, bad_name} -> ok
+            , ?LOG_DEBUG("Cannot find futon_couchdb priv dir", [])
+            , old_futon(Req)
+        ; Priv_dir -> ok
+            , Mobile_dir = Priv_dir ++ "/mobilefuton"
+            , case httpd_conf:is_directory(Mobile_dir)
+                of {ok, Mobile_dir} -> ok
+                    , mobile_enabled_futon(Req)
+                ; Else -> ok
+                    , ?LOG_DEBUG("Bad mobilefuton dir ~p: ~p", [Mobile_dir, Else])
+                    , old_futon(Req)
+                end
+        end
+    .
+
+mobile_enabled_futon(Req) -> ok
+    , ?LOG_DEBUG("Considering mobile futon", [])
     , old_futon(Req)
     .
 
