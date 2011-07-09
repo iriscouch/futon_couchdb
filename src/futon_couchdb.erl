@@ -36,7 +36,7 @@ handle_futon_req(mobile, Req) -> ok
             , Mobile_dir = Priv_dir ++ "/mobilefuton"
             , case httpd_conf:is_directory(Mobile_dir)
                 of {ok, Mobile_dir} -> ok
-                    , mobile_enabled_futon(Req)
+                    , mobile_enabled_futon(Req, Mobile_dir)
                 ; Else -> ok
                     , ?LOG_DEBUG("Bad mobilefuton dir ~p: ~p", [Mobile_dir, Else])
                     , old_futon(Req)
@@ -45,7 +45,7 @@ handle_futon_req(mobile, Req) -> ok
     .
 
 
-mobile_enabled_futon(#httpd{mochi_req=MochiReq}=Req) -> ok
+mobile_enabled_futon(#httpd{mochi_req=MochiReq}=Req, Mobile_dir) -> ok
     , case MochiReq:get_header_value("user-agent")
         of undefined -> ok
             , old_futon(Req)
@@ -57,13 +57,13 @@ mobile_enabled_futon(#httpd{mochi_req=MochiReq}=Req) -> ok
             , case re:run(User_agent, ?MOBILE_UA_RE, [caseless])
                 of {match, _Match1} -> ok
                     , ?LOG_DEBUG("Mobile browser first match: ~s", [User_agent])
-                    , mobile_futon(Req)
+                    , mobile_futon(Req, Mobile_dir)
                 ; nomatch -> ok
                     , First_4 = string:substr(User_agent, 1, 4)
                     , case re:run(First_4, ?MOBILE_UA_TRUNC_RE, [caseless])
                         of {match, _Match2} -> ok
                             , ?LOG_DEBUG("Mobile browser second match: ~s", [User_agent])
-                            , mobile_futon(Req)
+                            , mobile_futon(Req, Mobile_dir)
                         ; nomatch -> ok
                             , ?LOG_DEBUG("Not a mobile browser: ~s", [User_agent])
                             , old_futon(Req)
@@ -72,8 +72,8 @@ mobile_enabled_futon(#httpd{mochi_req=MochiReq}=Req) -> ok
         end
     .
 
-mobile_futon(Req) -> ok
-    , send_500(Req)
+mobile_futon(Req, Mobile_dir) -> ok
+    , send_from_dir(Req, Mobile_dir)
     .
 
 old_futon(#httpd{}=Req) -> ok
@@ -84,14 +84,19 @@ old_futon(#httpd{}=Req) -> ok
             , send_500(Req, "We screwed up! Please email support@iriscouch.com and we will fix it ASAP")
         ; Favicon_cfg -> ok
             , case couch_util:parse_term(Favicon_cfg)
-                of {ok, {Mod, Func, Futon_dir}} -> ok
+                of {ok, {_Mod, _Func, Futon_dir}} -> ok
                     %, ?LOG_DEBUG("~p:~p ~p", [Mod, Func, Futon_dir])
-                    , couch_httpd_misc_handlers:handle_utils_dir_req(Req, Futon_dir)
+                    , send_from_dir(Req, Futon_dir)
                 ; _ -> ok
                     , ?LOG_ERROR("Bad favicon config: ~p", [Favicon_cfg])
                     , send_500(Req, "We screwed up! Please email support@iriscouch.com and we will fix it ASAP")
                 end
         end
+    .
+
+
+send_from_dir(Req, Dir) -> ok
+    , couch_httpd_misc_handlers:handle_utils_dir_req(Req, Dir)
     .
 
 %
