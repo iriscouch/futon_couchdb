@@ -103,9 +103,9 @@ send_from_dir(Req, Dir) -> ok
 % Utilities
 %
 
-send_500(Req) -> ok
-    , send_500(Req, "not_implmented")
-    .
+%send_500(Req) -> ok
+%    , send_500(Req, "not_implmented")
+%    .
 
 send_500(Req, Msg) when is_list(Msg) -> ok
     , send_500(Req, list_to_binary(Msg))
