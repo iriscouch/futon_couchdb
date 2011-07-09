@@ -3,9 +3,9 @@
 -module(futon_couchdb).
 -author('Jason Smith <jhs@iriscouch.com>').
 
--export([handle_futon_req/1]).
-
 -include("couch_db.hrl").
+
+-export([handle_futon_req/1]).
 
 handle_futon_req(#httpd{}=Req) -> ok
     , ?LOG_DEBUG("Received Futon request:\n~p", [Req])
