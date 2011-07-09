@@ -1,12 +1,12 @@
-{application, futon_couchdb,
- [
-  {description, ""},
-  {vsn, "1"},
-  {registered, []},
-  {applications, [
-                  kernel,
-                  stdlib
-                 ]},
-  {mod, { futon_couchdb_app, []}},
-  {env, []}
- ]}.
+{ application, futon_couchdb
+, [ {description, "Dynamic Futon for Iris Couch service"}
+  , {vsn, "0.1.0"}
+  , {registered, []}
+  , { applications, [ kernel
+                    , stdlib
+                    ]
+    }
+  , {mod, { futon_couchdb_app, []}}
+  , {env, []}
+  ]
+}.
