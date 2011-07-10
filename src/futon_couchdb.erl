@@ -76,7 +76,38 @@ mobile_futon(Req, Mobile_dir) -> ok
     , send_from_dir(Req, Mobile_dir)
     .
 
+
 browser_futon(#httpd{}=Req) -> ok
+    , case couch_config:get("httpd", "sammy_futon")
+        of Not_true when Not_true =/= "true" -> ok
+            % Sammy Futon is disabled in the config.
+            , old_futon(Req)
+        ; "true" -> ok
+            , sammy_futon(Req)
+        end
+    .
+
+
+sammy_futon(#httpd{}=Req) -> ok
+    , case code:priv_dir(?MODULE)
+        of {error, bad_name} -> ok
+            , ?LOG_DEBUG("Cannot find ~p priv dir", [?MODULE])
+            , old_futon(Req)
+        ; Priv_dir -> ok
+            , Sammy_dir = Priv_dir ++ "/sammy_futon"
+            , case httpd_conf:is_directory(Sammy_dir)
+                of {ok, Sammy_dir} -> ok
+                    , ?LOG_DEBUG("Serving Sammy Futon: ~s", [Sammy_dir])
+                    , send_from_dir(Req, Sammy_dir)
+                ; Else -> ok
+                    , ?LOG_DEBUG("Bad sammy_futon dir ~p: ~p", [Sammy_dir, Else])
+                    , old_futon(Req)
+                end
+        end
+    .
+
+
+old_futon(#httpd{}=Req) -> ok
     % XXX: For now, use the same config as favicon.ico.
     , case couch_config:get("httpd_global_handlers", "favicon.ico")
         of undefined -> ok
