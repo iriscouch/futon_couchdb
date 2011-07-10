@@ -23,7 +23,7 @@ handle_futon_req(#httpd{}=Req) -> ok
             , handle_futon_req(mobile, Req)
         ; _ -> ok
             % Mobile futon is diabled in the config
-            , old_futon(Req)
+            , browser_futon(Req)
         end
     .
 
@@ -31,7 +31,7 @@ handle_futon_req(mobile, Req) -> ok
     , case code:priv_dir(?MODULE)
         of {error, bad_name} -> ok
             , ?LOG_DEBUG("Cannot find futon_couchdb priv dir", [])
-            , old_futon(Req)
+            , browser_futon(Req)
         ; Priv_dir -> ok
             , Mobile_dir = Priv_dir ++ "/mobilefuton"
             , case httpd_conf:is_directory(Mobile_dir)
@@ -39,7 +39,7 @@ handle_futon_req(mobile, Req) -> ok
                     , mobile_enabled_futon(Req, Mobile_dir)
                 ; Else -> ok
                     , ?LOG_DEBUG("Bad mobilefuton dir ~p: ~p", [Mobile_dir, Else])
-                    , old_futon(Req)
+                    , browser_futon(Req)
                 end
         end
     .
@@ -48,10 +48,10 @@ handle_futon_req(mobile, Req) -> ok
 mobile_enabled_futon(#httpd{mochi_req=MochiReq}=Req, Mobile_dir) -> ok
     , case MochiReq:get_header_value("user-agent")
         of undefined -> ok
-            , old_futon(Req)
+            , browser_futon(Req)
         ; Unknown when not is_list(Unknown) -> ok
             , ?LOG_ERROR("Unknown user-agent: ~p", [Unknown])
-            , old_futon(Req)
+            , browser_futon(Req)
         ; User_agent -> ok
             , ?LOG_DEBUG("Considering mobile futon\n~p", [User_agent])
             , case re:run(User_agent, ?MOBILE_UA_RE, [caseless])
@@ -66,7 +66,7 @@ mobile_enabled_futon(#httpd{mochi_req=MochiReq}=Req, Mobile_dir) -> ok
                             , mobile_futon(Req, Mobile_dir)
                         ; nomatch -> ok
                             , ?LOG_DEBUG("Not a mobile browser: ~s", [User_agent])
-                            , old_futon(Req)
+                            , browser_futon(Req)
                         end
                 end
         end
@@ -76,7 +76,7 @@ mobile_futon(Req, Mobile_dir) -> ok
     , send_from_dir(Req, Mobile_dir)
     .
 
-old_futon(#httpd{}=Req) -> ok
+browser_futon(#httpd{}=Req) -> ok
     % XXX: For now, use the same config as favicon.ico.
     , case couch_config:get("httpd_global_handlers", "favicon.ico")
         of undefined -> ok
