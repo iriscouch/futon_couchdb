@@ -22,7 +22,7 @@ handle_futon_req(#httpd{}=Req) -> ok
         of "true" -> ok
             , handle_futon_req(mobile, Req)
         ; _ -> ok
-            % Mobile futon is diabled in the config
+            % Mobile futon is disabled in the config.
             , browser_futon(Req)
         end
     .
