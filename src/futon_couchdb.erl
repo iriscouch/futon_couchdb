@@ -169,4 +169,24 @@ send_500(Req, Msg) -> ok
     , couch_httpd:send_json(Req, 500, {[{error, Msg}]})
     .
 
+host_has_dot(#httpd{mochi_req=MochiReq}) -> ok
+    , host_has_dot(header, MochiReq:get_header_value("host"))
+    .
+
+host_has_dot(header, Host) when not is_list(Host) -> ok
+    , false
+    ;
+
+host_has_dot(header, Host) -> ok
+    , case string:tokens(Host, ":")
+        of [Hostname, _] when is_list(Hostname) -> host_has_dot(hostname, Hostname)
+        ;  [Hostname]    when is_list(Hostname) -> host_has_dot(hostname, Hostname)
+        ;  _ -> false
+        end
+    ;
+
+host_has_dot(hostname, Hostname) -> ok
+    , lists:suffix(".", Hostname)
+    .
+
 % vim: sw=4 sts=4 et
