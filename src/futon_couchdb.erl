@@ -79,11 +79,15 @@ mobile_futon(Req, Mobile_dir) -> ok
 
 browser_futon(#httpd{}=Req) -> ok
     , case couch_config:get("httpd", "sammy_futon")
-        of Not_true when Not_true =/= "true" -> ok
-            % Sammy Futon is disabled in the config.
-            , old_futon(Req)
-        ; "true" -> ok
+        of "true" -> ok
             , sammy_futon(Req)
+        ; _Not_true -> ok
+            % Sammy Futon is disabled in the config. Check for the hostname dot easter egg, "foo.iriscouch.com."
+            %, ?LOG_INFO("HOST HAS DOT: ~p", [host_has_dot(Req)])
+            , case host_has_dot(Req)
+                of true -> sammy_futon(Req)
+                ; false -> old_futon(Req)
+                end
         end
     .
 
