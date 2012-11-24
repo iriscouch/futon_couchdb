@@ -8,6 +8,7 @@ Primarily, this is a simple reference implementation of a CouchDB plugin. Notewo
 * Building such a project, "linking" against CouchDB.
 * Integrating the plugin (an http handler) into CouchDB
 * Supporting custom configuration options, and defining their defaults
+* Using files from a plugin-local private directory
 
 ## Features
 
