@@ -60,3 +60,7 @@ Next, teach rebar where to find CouchDB, and teach Erlang and Couch where to fin
 You're ready. Run this every time you change the code:
 
     ./rebar compile && ../couchdb/utils/run -i
+
+## License
+
+Apache 2.0
