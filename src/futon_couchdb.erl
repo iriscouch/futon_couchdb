@@ -92,27 +92,6 @@ browser_futon(#httpd{}=Req) -> ok
     .
 
 
-%sammy_futon(#httpd{method='GET', requested_path_parts=[<<"_utils">>,<<"image">>,<<"logo.png">>]}=Req) -> ok
-%    % This avoids having to modify the filesystem, thus avoiding future imports overwriting changes.
-%    , Mochi_req = Req#httpd.mochi_req
-%    , Logo_path = "/_utils/image/iris_couch.png"
-%    , New_mochi_req = mochiweb_request:new( Mochi_req:get(socket)
-%                                          , Mochi_req:get(method)
-%                                          , Logo_path
-%                                          , Mochi_req:get(version)
-%                                          , Mochi_req:get(oob)
-%                                          , Mochi_req:get(headers)
-%                                          )
-%    %, ?LOG_DEBUG("MochiReq:\n~p", [MochiReq:get(path)])
-%    , Logo = [ <<"_utils">>, <<"image">>, <<"iris_couch.png">> ]
-%    , Iris_req = Req#httpd{ requested_path_parts = Logo
-%                          , path_parts           = Logo
-%                          , mochi_req            = New_mochi_req
-%                          }
-%
-%    , sammy_futon(Iris_req)
-%    ;
-
 sammy_futon(#httpd{}=Req) -> ok
     %, ?LOG_DEBUG("Req requested_path_parts:\n~p", [Req#httpd.requested_path_parts])
     %, ?LOG_DEBUG("Req path_parts:\n~p", [Req#httpd.path_parts])
